@@ -52,13 +52,14 @@ export default function ThemeWrapper({ children }: ThemeWrapperProps) {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors flex flex-col relative overflow-hidden">
       
-      {/* Decorative ambient background glows */}
-      <div className="absolute top-[-250px] left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-brand-cyan/20 to-transparent dark:from-brand-cyan/12 rounded-full blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute top-[400px] right-[-300px] w-[600px] h-[600px] bg-gradient-to-br from-brand-violet/8 to-transparent rounded-full blur-[100px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[-200px] left-[-300px] w-[600px] h-[600px] bg-gradient-to-tr from-brand-cyan/8 to-transparent rounded-full blur-[100px] pointer-events-none -z-10" />
+      {/* Decorative ambient background — big colorful washes */}
+      <div className="absolute top-[-200px] left-[15%] w-[900px] h-[500px] bg-gradient-to-br from-brand-cyan/30 via-brand-cyan/10 to-transparent dark:from-brand-cyan/12 dark:via-brand-cyan/4 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="absolute top-[300px] right-[-200px] w-[700px] h-[700px] bg-gradient-to-bl from-brand-violet/20 via-brand-violet/8 to-transparent dark:from-brand-violet/10 dark:via-brand-violet/3 rounded-full blur-[110px] pointer-events-none -z-10" />
+      <div className="absolute bottom-[-150px] left-[-200px] w-[600px] h-[600px] bg-gradient-to-tr from-brand-cyan/15 to-transparent dark:from-brand-cyan/6 rounded-full blur-[90px] pointer-events-none -z-10" />
+      <div className="absolute top-[60%] left-[40%] w-[500px] h-[400px] bg-gradient-to-r from-brand-violet/10 via-pink-400/8 to-transparent dark:from-brand-violet/5 dark:via-pink-500/3 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-      {/* Grid pattern background overlay using brand-cyan tint */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,182,212,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-20" />
+      {/* Subtle dot texture overlay instead of rigid grid */}
+      <div className="absolute inset-0 opacity-[0.025] dark:opacity-[0.015] pointer-events-none -z-20" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
       {/* Global Navbar */}
       <div className="px-4 md:px-8 pt-4">
