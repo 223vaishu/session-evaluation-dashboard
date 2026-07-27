@@ -5,6 +5,7 @@ import { INITIAL_SESSIONS, Session } from '../lib/mockData';
 import DashboardHeader from '../components/DashboardHeader';
 import KpiCards from '../components/KpiCards';
 import SessionList from '../components/SessionList';
+import AnalyticsCharts from '../components/AnalyticsCharts';
 
 export default function Home() {
   const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
@@ -89,11 +90,8 @@ export default function Home() {
               onSelectSession={setSelectedSessionId}
             />
             
-            {/* Visual Charts Placeholder */}
-            <div className="glass-panel p-6 rounded-2xl shadow-sm text-center">
-              <h3 className="text-base font-bold mb-2">Analytics Visualizations</h3>
-              <p className="text-sm text-muted-foreground">Charts are being loaded on this branch placeholder...</p>
-            </div>
+            {/* Visual Charts */}
+            <AnalyticsCharts sessions={filteredSessions} />
           </div>
 
           {/* Right Column: Session Deep-Dive Details Placeholder */}
