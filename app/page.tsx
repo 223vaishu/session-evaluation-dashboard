@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { INITIAL_SESSIONS, Session } from '../lib/mockData';
+import { INITIAL_SESSIONS, Session, Feedback, classifySentiment } from '../lib/mockData';
 import DashboardHeader from '../components/DashboardHeader';
 import KpiCards from '../components/KpiCards';
 import SessionList from '../components/SessionList';
 import AnalyticsCharts from '../components/AnalyticsCharts';
+import SessionDetailPanel from '../components/SessionDetailPanel';
+import EvaluationForm, { EvaluationFormInputs } from '../components/EvaluationForm';
 
 export default function Home() {
   const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
@@ -16,7 +18,7 @@ export default function Home() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Initialize theme
+  // Initialize theme on mount to avoid hydration mismatches
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const initialTheme = savedTheme || 'dark';
@@ -39,7 +41,7 @@ export default function Home() {
     }
   };
 
-  // Filter sessions
+  // Filter sessions based on search & tags
   const filteredSessions = sessions.filter((session) => {
     const matchesSearch =
       session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,7 +51,7 @@ export default function Home() {
     return matchesSearch && matchesCourse && matchesInstructor;
   });
 
-  // Set selected session automatically if none is selected
+  // Automatically select the first visible session if the active selection gets filtered out
   useEffect(() => {
     if (filteredSessions.length > 0) {
       if (!selectedSessionId || !filteredSessions.some(s => s.id === selectedSessionId)) {
@@ -62,10 +64,72 @@ export default function Home() {
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId) || null;
 
+  // Handler for new evaluation submissions
+  const handleAddEvaluation = (data: EvaluationFormInputs) => {
+    const sentiment = classifySentiment(data.comment);
+    const newFeedback: Feedback = {
+      id: `fb-added-${Date.now()}`,
+      rating: data.overall,
+      comment: data.comment,
+      sentiment,
+      date: new Date().toISOString(),
+    };
+
+    if (data.sessionMode === 'existing' && data.sessionId) {
+      // Add feedback to existing session & recompute weighted criteria rating averages
+      setSessions((prevSessions) =>
+        prevSessions.map((session) => {
+          if (session.id !== data.sessionId) return session;
+
+          const updatedFeedbacks = [newFeedback, ...session.feedbacks];
+          const count = session.feedbacks.length;
+
+          const updatedRatings = {
+            overall: Number(((session.ratings.overall * count + data.overall) / (count + 1)).toFixed(2)),
+            content: Number(((session.ratings.content * count + data.content) / (count + 1)).toFixed(2)),
+            delivery: Number(((session.ratings.delivery * count + data.delivery) / (count + 1)).toFixed(2)),
+            materials: Number(((session.ratings.materials * count + data.materials) / (count + 1)).toFixed(2)),
+            pacing: Number(((session.ratings.pacing * count + data.pacing) / (count + 1)).toFixed(2)),
+          };
+
+          return {
+            ...session,
+            ratings: updatedRatings,
+            feedbacks: updatedFeedbacks,
+            attendeesCount: session.attendeesCount + 1,
+          };
+        })
+      );
+    } else {
+      // Create a brand new session with this evaluation as its first feedback
+      const newSession: Session = {
+        id: `sess-added-${Date.now()}`,
+        title: data.newSessionTitle || 'New Session',
+        course: data.course,
+        instructor: data.instructor,
+        date: new Date().toISOString(),
+        duration: 90,
+        attendeesCount: 1,
+        ratings: {
+          overall: data.overall,
+          content: data.content,
+          delivery: data.delivery,
+          materials: data.materials,
+          pacing: data.pacing,
+        },
+        feedbacks: [newFeedback],
+      };
+      setSessions((prevSessions) => [newSession, ...prevSessions]);
+      setSelectedSessionId(newSession.id); // Automatically view the new session
+    }
+
+    setIsFormOpen(false);
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+        {/* Header containing title, search, filters, theme-switch, and CTAs */}
         <DashboardHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -78,55 +142,40 @@ export default function Home() {
           onAddFeedbackClick={() => setIsFormOpen(true)}
         />
 
-        {/* KPI Summary Cards */}
+        {/* Dynamic Key Performance Indicator (KPI) Widgets */}
         <KpiCards sessions={filteredSessions} />
 
+        {/* Dashboard Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Sessions List */}
+          {/* Main Content Column (Lists & Analytics) */}
           <div className="lg:col-span-2 space-y-6">
+            {/* List Table of Evaluated Courses */}
             <SessionList
               sessions={filteredSessions}
               selectedSessionId={selectedSessionId}
               onSelectSession={setSelectedSessionId}
             />
             
-            {/* Visual Charts */}
+            {/* Analytics Trends and Comparisons */}
             <AnalyticsCharts sessions={filteredSessions} />
           </div>
 
-          {/* Right Column: Session Deep-Dive Details Placeholder */}
-          <div className="space-y-6">
-            <div className="glass-panel p-6 rounded-2xl shadow-sm h-full flex flex-col justify-center items-center text-center">
-              <h3 className="text-base font-bold mb-2">Session Deep Dive</h3>
-              <p className="text-sm text-muted-foreground">Select a session to see detailed evaluations.</p>
-              {selectedSession && (
-                <div className="mt-4 p-4 border border-border rounded-xl w-full text-left bg-muted/20">
-                  <p className="font-semibold text-sm line-clamp-1">{selectedSession.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Instructor: {selectedSession.instructor}</p>
-                  <p className="text-xs text-muted-foreground">Course: {selectedSession.course}</p>
-                  <p className="text-xs text-amber-500 font-bold mt-2">⭐ {selectedSession.ratings.overall.toFixed(1)} / 5.0</p>
-                </div>
-              )}
+          {/* Sidebar Column (Selected Session Deep-Dive Review) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <SessionDetailPanel session={selectedSession} />
             </div>
           </div>
         </div>
       </div>
       
-      {/* Dynamic Feedback Form Modal Placeholder */}
-      {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="glass-panel p-6 rounded-2xl shadow-lg w-full max-w-md mx-4">
-            <h3 className="text-lg font-bold mb-2">Add Evaluation Feedback</h3>
-            <p className="text-sm text-muted-foreground mb-4">Feedback submission form is being prepared for release...</p>
-            <button
-              onClick={() => setIsFormOpen(false)}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:opacity-90 transition-all w-full"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Slide-over Feedback Form Modal Container */}
+      <EvaluationForm
+        sessions={sessions}
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleAddEvaluation}
+      />
     </main>
   );
 }
