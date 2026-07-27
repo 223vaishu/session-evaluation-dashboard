@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FiSearch, FiSun, FiMoon, FiPlus, FiBookOpen } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiBookOpen } from 'react-icons/fi';
 import { COURSES, INSTRUCTORS } from '../lib/mockData';
 
 interface DashboardHeaderProps {
@@ -11,8 +11,6 @@ interface DashboardHeaderProps {
   onCourseChange: (course: string) => void;
   selectedInstructor: string;
   onInstructorChange: (instructor: string) => void;
-  theme: 'light' | 'dark';
-  onToggleTheme: () => void;
   onAddFeedbackClick: () => void;
 }
 
@@ -23,8 +21,6 @@ export default function DashboardHeader({
   onCourseChange,
   selectedInstructor,
   onInstructorChange,
-  theme,
-  onToggleTheme,
   onAddFeedbackClick,
 }: DashboardHeaderProps) {
   return (
@@ -90,14 +86,7 @@ export default function DashboardHeader({
             ))}
           </select>
 
-          {/* Theme Toggle Button */}
-          <button
-            onClick={onToggleTheme}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-background border border-border text-foreground hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
-          </button>
+
 
           {/* Add Evaluation Button */}
           <button

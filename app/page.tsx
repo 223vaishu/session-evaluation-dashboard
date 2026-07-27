@@ -15,34 +15,7 @@ export default function Home() {
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [selectedInstructor, setSelectedInstructor] = useState('all');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isFormOpen, setIsFormOpen] = useState(false);
-
-  // Initialize theme on mount to avoid hydration mismatches
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const initialTheme = savedTheme || 'dark';
-    const timer = setTimeout(() => {
-      setTheme(initialTheme);
-    }, 0);
-    if (initialTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleToggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   // Filter sessions based on search & tags
   const filteredSessions = sessions.filter((session) => {
@@ -149,8 +122,6 @@ export default function Home() {
           onCourseChange={setSelectedCourse}
           selectedInstructor={selectedInstructor}
           onInstructorChange={setSelectedInstructor}
-          theme={theme}
-          onToggleTheme={handleToggleTheme}
           onAddFeedbackClick={() => setIsFormOpen(true)}
         />
 
