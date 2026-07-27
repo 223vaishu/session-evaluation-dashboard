@@ -20,11 +20,67 @@ interface AnalyticsChartsProps {
   sessions: Session[];
 }
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    payload: {
+      title?: string;
+    };
+  }>;
+  label?: string;
+}
+
+interface BarTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+  }>;
+  label?: string;
+}
+
+// Custom tooltips for premium feel declared outside render to prevent resets
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="glass-panel p-3 rounded-xl shadow-lg border border-border/80 text-xs">
+        <p className="font-bold text-foreground mb-1">{label}</p>
+        <p className="font-semibold text-primary">
+          Average Rating: <span className="font-bold text-sm text-foreground">{payload[0].value} / 5.0</span>
+        </p>
+        {payload[0].payload.title && (
+          <p className="text-muted-foreground mt-1 max-w-[200px] truncate">
+            {payload[0].payload.title}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+const BarTooltip = ({ active, payload, label }: BarTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="glass-panel p-3 rounded-xl shadow-lg border border-border/80 text-xs">
+        <p className="font-bold text-foreground mb-1">{label}</p>
+        <p className="font-semibold text-primary">
+          Score: <span className="font-bold text-sm text-foreground">{payload[0].value} / 5.0</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) {
@@ -70,8 +126,8 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
     .sort((a, b) => b.rating - a.rating); // Sort high to low
 
   // --- Chart 3: Evaluation Criteria Breakdown ---
-  let criteriaSums = { content: 0, delivery: 0, materials: 0, pacing: 0, overall: 0 };
-  let sessionCount = sessions.length;
+  const criteriaSums = { content: 0, delivery: 0, materials: 0, pacing: 0, overall: 0 };
+  const sessionCount = sessions.length;
 
   if (sessionCount > 0) {
     sessions.forEach((session) => {
@@ -94,40 +150,6 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
   // Theme-aware custom color utilities for SVG rendering
   const gridColor = 'rgba(148, 163, 184, 0.08)';
   const labelColor = '#94a3b8'; // text-slate-400
-
-  // Custom tooltips for premium feel
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="glass-panel p-3 rounded-xl shadow-lg border border-border/80 text-xs">
-          <p className="font-bold text-foreground mb-1">{label}</p>
-          <p className="font-semibold text-primary">
-            Average Rating: <span className="font-bold text-sm text-foreground">{payload[0].value} / 5.0</span>
-          </p>
-          {payload[0].payload.title && (
-            <p className="text-muted-foreground mt-1 max-w-[200px] truncate">
-              {payload[0].payload.title}
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const BarTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="glass-panel p-3 rounded-xl shadow-lg border border-border/80 text-xs">
-          <p className="font-bold text-foreground mb-1">{label}</p>
-          <p className="font-semibold text-primary">
-            Score: <span className="font-bold text-sm text-foreground">{payload[0].value} / 5.0</span>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

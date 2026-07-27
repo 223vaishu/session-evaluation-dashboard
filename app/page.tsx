@@ -22,12 +22,15 @@ export default function Home() {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const initialTheme = savedTheme || 'dark';
-    setTheme(initialTheme);
+    const timer = setTimeout(() => {
+      setTheme(initialTheme);
+    }, 0);
     if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    return () => clearTimeout(timer);
   }, []);
 
   const handleToggleTheme = () => {
@@ -53,13 +56,22 @@ export default function Home() {
 
   // Automatically select the first visible session if the active selection gets filtered out
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (filteredSessions.length > 0) {
       if (!selectedSessionId || !filteredSessions.some(s => s.id === selectedSessionId)) {
-        setSelectedSessionId(filteredSessions[0].id);
+        const firstId = filteredSessions[0].id;
+        timer = setTimeout(() => {
+          setSelectedSessionId(firstId);
+        }, 0);
       }
     } else {
-      setSelectedSessionId(null);
+      timer = setTimeout(() => {
+        setSelectedSessionId(null);
+      }, 0);
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [filteredSessions, selectedSessionId]);
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId) || null;
