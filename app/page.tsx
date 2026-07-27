@@ -1,33 +1,55 @@
 'use client';
 
+/**
+ * Dashboard Home Page
+ * 
+ * This is the primary entry point for the Session Evaluation Dashboard.
+ * It composes several feature components into a responsive layout:
+ * 
+ * ┌─────────────────────────────────────┐
+ * │ DashboardHeader (search + filters)  │
+ * ├─────────────────────────────────────┤
+ * │ KpiCards (4x metric summary)        │
+ * ├──────────────────────┬──────────────┤
+ * │ SessionList          │ DetailPanel  │
+ * │ AnalyticsCharts      │ (sticky)     │
+ * └──────────────────────┴──────────────┘
+ * 
+ * State management approach:
+ * - Filter state is encapsulated in useSessionFilters (custom hook)
+ * - Session selection uses local useState (single page, no need for Context)
+ * - Form state is managed by react-hook-form inside EvaluationForm
+ * - We chose useState over Context/Redux because all state is local to this
+ *   page — no other route needs access to the filter or selection state
+ */
+
 import React, { useState, useEffect } from 'react';
-import { INITIAL_SESSIONS, Session, Feedback, classifySentiment } from '../lib/mockData';
+import { INITIAL_SESSIONS, classifySentiment } from '../lib/mockData';
+import { useSessionFilters } from '../hooks/useSessionFilters';
 import DashboardHeader from '../components/DashboardHeader';
 import KpiCards from '../components/KpiCards';
 import SessionList from '../components/SessionList';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import SessionDetailPanel from '../components/SessionDetailPanel';
-import EvaluationForm, { EvaluationFormInputs } from '../components/EvaluationForm';
+import EvaluationForm from '../components/EvaluationForm';
+import type { Session, Feedback, EvaluationFormInputs } from '../types';
 
 export default function Home() {
   const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('all');
-  const [selectedInstructor, setSelectedInstructor] = useState('all');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Filter sessions based on search & tags
-  const filteredSessions = sessions.filter((session) => {
-    const matchesSearch =
-      session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      session.instructor.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCourse = selectedCourse === 'all' || session.course === selectedCourse;
-    const matchesInstructor = selectedInstructor === 'all' || session.instructor === selectedInstructor;
-    return matchesSearch && matchesCourse && matchesInstructor;
-  });
+  // Filter logic extracted into custom hook for testability and reuse
+  const {
+    filters,
+    filteredSessions,
+    setSearchQuery,
+    setSelectedCourse,
+    setSelectedInstructor,
+    resetFilters,
+  } = useSessionFilters(sessions);
 
-  // Automatically select the first visible session if the active selection gets filtered out
+  // Auto-select first visible session when filters change
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (filteredSessions.length > 0) {
@@ -49,7 +71,14 @@ export default function Home() {
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId) || null;
 
-  // Handler for new evaluation submissions
+  /**
+   * Handles new evaluation submissions from the EvaluationForm.
+   * 
+   * Two modes:
+   * 1. "existing" — adds feedback to an existing session and recalculates
+   *    weighted rating averages using running mean formula
+   * 2. "new" — creates a brand new session with this as its first evaluation
+   */
   const handleAddEvaluation = (data: EvaluationFormInputs) => {
     const sentiment = classifySentiment(data.comment);
     const newFeedback: Feedback = {
@@ -61,7 +90,7 @@ export default function Home() {
     };
 
     if (data.sessionMode === 'existing' && data.sessionId) {
-      // Add feedback to existing session & recompute weighted criteria rating averages
+      // Recalculate weighted averages using running mean: new_avg = (old_avg * n + new_val) / (n + 1)
       setSessions((prevSessions) =>
         prevSessions.map((session) => {
           if (session.id !== data.sessionId) return session;
@@ -86,7 +115,7 @@ export default function Home() {
         })
       );
     } else {
-      // Create a brand new session with this evaluation as its first feedback
+      // Create brand new session with this evaluation as its first feedback
       const newSession: Session = {
         id: `sess-added-${Date.now()}`,
         title: data.newSessionTitle || 'New Session',
@@ -105,7 +134,7 @@ export default function Home() {
         feedbacks: [newFeedback],
       };
       setSessions((prevSessions) => [newSession, ...prevSessions]);
-      setSelectedSessionId(newSession.id); // Automatically view the new session
+      setSelectedSessionId(newSession.id);
     }
 
     setIsFormOpen(false);
@@ -114,45 +143,58 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header containing title, search, filters, theme-switch, and CTAs */}
+        {/* Header: search bar, course/instructor filters, and "Add Feedback" CTA */}
         <DashboardHeader
-          searchQuery={searchQuery}
+          searchQuery={filters.searchQuery}
           onSearchChange={setSearchQuery}
-          selectedCourse={selectedCourse}
+          selectedCourse={filters.selectedCourse}
           onCourseChange={setSelectedCourse}
-          selectedInstructor={selectedInstructor}
+          selectedInstructor={filters.selectedInstructor}
           onInstructorChange={setSelectedInstructor}
           onAddFeedbackClick={() => setIsFormOpen(true)}
         />
 
-        {/* Dynamic Key Performance Indicator (KPI) Widgets */}
+        {/* KPI summary cards — dynamically computed from filtered dataset */}
         <KpiCards sessions={filteredSessions} />
 
-        {/* Dashboard Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Column (Lists & Analytics) */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* List Table of Evaluated Courses */}
-            <SessionList
-              sessions={filteredSessions}
-              selectedSessionId={selectedSessionId}
-              onSelectSession={setSelectedSessionId}
-            />
-            
-            {/* Analytics Trends and Comparisons */}
-            <AnalyticsCharts sessions={filteredSessions} />
+        {/* Empty state when no sessions match the active filters */}
+        {filteredSessions.length === 0 ? (
+          <div className="glass-panel rounded-2xl p-12 text-center space-y-3 mt-6">
+            <p className="text-4xl">🔍</p>
+            <h3 className="text-base font-bold text-foreground">No sessions match your filters</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Try adjusting your search query, course selection, or instructor filter to see results.
+            </p>
+            <button
+              onClick={resetFilters}
+              className="mt-2 px-5 py-2 rounded-xl text-sm font-semibold text-brand-cyan border border-brand-cyan/30 hover:bg-brand-cyan/5 transition-colors"
+            >
+              Reset all filters
+            </button>
           </div>
+        ) : (
+          /* Main content grid: session list + charts on left, detail panel on right */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <SessionList
+                sessions={filteredSessions}
+                selectedSessionId={selectedSessionId}
+                onSelectSession={setSelectedSessionId}
+              />
+              <AnalyticsCharts sessions={filteredSessions} />
+            </div>
 
-          {/* Sidebar Column (Selected Session Deep-Dive Review) */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <SessionDetailPanel session={selectedSession} />
+            {/* Sticky sidebar — stays visible while scrolling through session list */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <SessionDetailPanel session={selectedSession} />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
-      
-      {/* Slide-over Feedback Form Modal Container */}
+
+      {/* Modal overlay: evaluation submission form */}
       <EvaluationForm
         sessions={sessions}
         isOpen={isFormOpen}
