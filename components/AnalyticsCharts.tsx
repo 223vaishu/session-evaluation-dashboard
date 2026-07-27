@@ -140,11 +140,11 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
   }
 
   const criteriaData = sessionCount > 0 ? [
-    { name: 'Overall', score: Number((criteriaSums.overall / sessionCount).toFixed(2)), color: '#6366f1' },
-    { name: 'Content', score: Number((criteriaSums.content / sessionCount).toFixed(2)), color: '#10b981' },
-    { name: 'Delivery', score: Number((criteriaSums.delivery / sessionCount).toFixed(2)), color: '#8b5cf6' },
-    { name: 'Materials', score: Number((criteriaSums.materials / sessionCount).toFixed(2)), color: '#f59e0b' },
-    { name: 'Pacing', score: Number((criteriaSums.pacing / sessionCount).toFixed(2)), color: '#3b82f6' },
+    { name: 'Overall', score: Number((criteriaSums.overall / sessionCount).toFixed(2)), color: '#06b6d4' },
+    { name: 'Content', score: Number((criteriaSums.content / sessionCount).toFixed(2)), color: '#8b5cf6' },
+    { name: 'Delivery', score: Number((criteriaSums.delivery / sessionCount).toFixed(2)), color: '#0891b2' },
+    { name: 'Materials', score: Number((criteriaSums.materials / sessionCount).toFixed(2)), color: '#a78bfa' },
+    { name: 'Pacing', score: Number((criteriaSums.pacing / sessionCount).toFixed(2)), color: '#22d3ee' },
   ] : [];
 
   // Theme-aware custom color utilities for SVG rendering
@@ -165,8 +165,8 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
               <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRating" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
@@ -190,11 +190,11 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
                 <Area 
                   type="monotone" 
                   dataKey="rating" 
-                  stroke="#6366f1" 
+                  stroke="#06b6d4" 
                   strokeWidth={2.5}
                   fillOpacity={1} 
                   fill="url(#colorRating)" 
-                  activeDot={{ r: 5, strokeWidth: 1.5, stroke: '#6366f1', fill: '#ffffff' }}
+                  activeDot={{ r: 5, strokeWidth: 1.5, stroke: '#06b6d4', fill: '#ffffff' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -238,7 +238,7 @@ export default function AnalyticsCharts({ sessions }: AnalyticsChartsProps) {
                   {courseData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={index === 0 ? '#6366f1' : index === 1 ? '#8b5cf6' : '#10b981'} 
+                      fill={index % 2 === 0 ? '#06b6d4' : '#8b5cf6'} 
                       opacity={0.85}
                     />
                   ))}

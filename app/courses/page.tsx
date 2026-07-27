@@ -162,7 +162,7 @@ export default function CoursesPage() {
       {/* Page Title & Search Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl bg-gradient-to-r from-primary via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl bg-gradient-to-r from-brand-cyan to-brand-violet bg-clip-text text-transparent">
             Courses Syllabus Catalog
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
@@ -201,13 +201,13 @@ export default function CoursesPage() {
               key={course}
               onClick={() => toggleExpand(course)}
               className={`glass-panel cursor-pointer rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 border border-border/80 flex flex-col group overflow-hidden ${
-                isExpanded ? 'ring-2 ring-primary border-transparent' : ''
+                isExpanded ? 'ring-2 ring-brand-cyan border-transparent' : ''
               }`}
             >
               {/* Card Header */}
               <div className="flex justify-between items-start gap-4 mb-3">
                 <div className="flex items-center gap-2">
-                  <FiBook className="text-primary group-hover:scale-110 transition-transform" size={18} />
+                  <FiBook className="text-brand-cyan group-hover:scale-110 transition-transform" size={18} />
                   <h3 className="font-extrabold text-sm text-foreground">{course}</h3>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${getDifficultyColor(info.difficulty)}`}>
@@ -230,7 +230,7 @@ export default function CoursesPage() {
                   <FiMessageSquare size={13} />
                   Reviews: <span className="text-foreground font-bold">{stats.totalReviews}</span>
                 </span>
-                <span className="ml-auto text-primary flex items-center gap-0.5 group-hover:translate-y-0.5 transition-transform">
+                <span className="ml-auto text-brand-cyan flex items-center gap-0.5 group-hover:translate-y-0.5 transition-transform">
                   {isExpanded ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
                 </span>
               </div>
@@ -244,7 +244,7 @@ export default function CoursesPage() {
                   <ul className="space-y-2">
                     {info.syllabus.map((topic, i) => (
                       <li key={i} className="text-xs flex items-start gap-2 text-foreground font-medium">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-brand-cyan mt-1.5 shrink-0" />
                         <span className="leading-relaxed">{topic}</span>
                       </li>
                     ))}

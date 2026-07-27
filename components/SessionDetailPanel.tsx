@@ -81,11 +81,11 @@ export default function SessionDetailPanel({ session, onClose }: SessionDetailPa
   };
 
   const criteriaList = [
-    { label: 'Overall Quality', score: session.ratings.overall, color: 'bg-primary' },
-    { label: 'Content Depth', score: session.ratings.content, color: 'bg-emerald-500' },
-    { label: 'Delivery & Explanation', score: session.ratings.delivery, color: 'bg-purple-500' },
-    { label: 'Slides & Materials', score: session.ratings.materials, color: 'bg-amber-500' },
-    { label: 'Pacing & Tempo', score: session.ratings.pacing, color: 'bg-blue-500' },
+    { label: 'Overall Quality', score: session.ratings.overall, color: 'bg-brand-cyan' },
+    { label: 'Content Depth', score: session.ratings.content, color: 'bg-brand-violet' },
+    { label: 'Delivery & Explanation', score: session.ratings.delivery, color: 'bg-brand-cyan' },
+    { label: 'Slides & Materials', score: session.ratings.materials, color: 'bg-brand-violet' },
+    { label: 'Pacing & Tempo', score: session.ratings.pacing, color: 'bg-brand-cyan' },
   ];
 
   return (

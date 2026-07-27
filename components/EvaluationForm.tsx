@@ -265,7 +265,7 @@ export default function EvaluationForm({
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-95 focus:outline-none transition-all shadow-md shadow-primary/20"
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-violet text-white text-sm font-semibold hover:opacity-90 active:scale-95 focus:outline-none transition-all shadow-md shadow-brand-cyan/20"
             >
               Submit Evaluation
             </button>

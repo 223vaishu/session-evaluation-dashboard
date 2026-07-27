@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
     <div className="space-y-8 animate-fade-in">
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl bg-gradient-to-r from-primary via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-black tracking-tight text-foreground md:text-3xl bg-gradient-to-r from-brand-cyan to-brand-violet bg-clip-text text-transparent">
           Comprehensive Analytics
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
         {/* Radar Chart: Overall Criteria Breakdown */}
         <div className="glass-panel p-5 rounded-2xl shadow-sm flex flex-col h-80">
           <div className="mb-4 flex items-center gap-2">
-            <FiPieChart className="text-primary" size={16} />
+            <FiPieChart className="text-brand-cyan" size={16} />
             <div>
               <h3 className="text-sm font-bold text-foreground">Criteria Radar Balance</h3>
               <p className="text-[10px] text-muted-foreground">Comparative balance between Content, Delivery, Pacing, and Materials</p>
@@ -179,9 +179,9 @@ export default function AnalyticsPage() {
                 <Radar
                   name="Metrics"
                   dataKey="score"
-                  stroke="#6366f1"
-                  fill="#6366f1"
-                  fillOpacity={0.25}
+                  stroke="#06b6d4"
+                  fill="#8b5cf6"
+                  fillOpacity={0.2}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -212,7 +212,7 @@ export default function AnalyticsPage() {
                   {instructorScores.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={index === 0 ? '#6366f1' : index === 1 ? '#8b5cf6' : '#10b981'}
+                      fill={index % 2 === 0 ? '#06b6d4' : '#8b5cf6'}
                       opacity={0.8}
                     />
                   ))}
@@ -225,7 +225,7 @@ export default function AnalyticsPage() {
         {/* Area Chart: Sentiment Index Timeline */}
         <div className="glass-panel p-5 rounded-2xl shadow-sm flex flex-col h-80 lg:col-span-2">
           <div className="mb-4 flex items-center gap-2">
-            <FiSmile className="text-emerald-500" size={16} />
+            <FiSmile className="text-brand-cyan" size={16} />
             <div>
               <h3 className="text-sm font-bold text-foreground">Positive Sentiment Timeline</h3>
               <p className="text-[10px] text-muted-foreground">Percentage of positive feedback remarks over chronological session schedules</p>
@@ -236,8 +236,8 @@ export default function AnalyticsPage() {
               <AreaChart data={sentimentTimeline} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRatio" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
@@ -247,11 +247,11 @@ export default function AnalyticsPage() {
                 <Area
                   type="monotone"
                   dataKey="ratio"
-                  stroke="#10b981"
+                  stroke="#06b6d4"
                   strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#colorRatio)"
-                  activeDot={{ r: 5, strokeWidth: 1.5, stroke: '#10b981', fill: '#ffffff' }}
+                  activeDot={{ r: 5, strokeWidth: 1.5, stroke: '#06b6d4', fill: '#ffffff' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
